@@ -127,5 +127,5 @@ help(package='foreign') ### pido ayuda a R, mediante la función help, sobre las
 
 install.packages("swirl") # instalar 
 
-library(swirl) # cargar
+library(swirl) # cargar 
 
