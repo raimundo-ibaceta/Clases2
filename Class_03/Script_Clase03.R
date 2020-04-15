@@ -13,17 +13,23 @@ library(readxl)
 library(data.table)
 
 
+casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE) ### cargue los datos y los transformé en data.table
 
-casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE)
+names(casos) ### nombres de las variables del data.table casos COVID.
+casos_region_metropolitana <- casos[Región=="Metropolitana",]### que me de todos los datos de la región metropolitana.
+casos[,table(Región)] ### me da cuantos casos hay por región
 
-names(casos)
-casos<-casos[Región=="Metropolitana",]
+
+casos_region_metropolitana[,table(Sexo)] ### me da cuantos casos hay por sexo en la región metropolitana.
+
+casos[,table(`Centro de salud`)]
+
 
 saveRDS(casos,"Class_03/casosRM.rds")
 
 write.csv(casos,file = 'Class_03/CasosCovid_RM.csv',fileEncoding = 'UTF-8')
 
-writexl::write_xlsx(casos,path = "Class_03/CasosenExcel.xlsx")
+writexl::write_xlsx(casos,path = "Class_03/CasosenExcel.xlsx") ### si es que quiero escribir un excel
 
 library(foreign)
 
@@ -33,45 +39,51 @@ write.dta
 
 casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T)
 
-casosRM[,table(Sexo)]
-casosRM[Sexo=="Fememino",Sexo:="Femenino"]
+casos_region_metropolitana[,table(Sexo)]
+casos_region_metropolitana[Sexo=="Fememino",Sexo:="Femenino"]
 
-casosRM[`Centro de salud`=="Clínica Alemana",`Centro de salud`:="Clinica Alemana"]
-casosRM[,.N,by=.(`Centro de salud`)]
+casos_region_metropolitana[`Centro de salud`=="Clínica Alemana",`Centro de salud`:="Clinica Alemana"]
+casos_region_metropolitana[,.N,by=.(`Centro de salud`)] ### casos de acuerdo al centro de salud en la rm.
 
 # Creating (factor) variables
 
-class(casosRM$Sexo)
+class(casos_region_metropolitana$Sexo)
 
-casosRM[,Sexo:=factor(Sexo)]
+casos_region_metropolitana[,Sexo:=factor(Sexo)] ### reemplazpo sexo con factor de sexo
 
-head(casosRM$Sexo)
-head(as.numeric(casosRM$Sexo))
+head(casos_region_metropolitana$Sexo) ### los niveles que hay son fememino y masculino.
+head(as.numeric(casos_region_metropolitana$Sexo))
 
-table(casosRM$Sexo)
-casosRM[,.N,by=.(Sexo)]
-casosRM[,.N,by=.(Sexo,`Centro de salud`)]
+levels(casos_region_metropolitana$Sexo)
+
+table(casos_region_metropolitana$Sexo)
+casos_region_metropolitana[,.N,by=.(Sexo)]
+casos_region_metropolitana[,.N,by=.(Sexo,`Centro de salud`)]### me entregará una lista de acuerdo a los casos de covid por sexo y centro de salud.
 
 #Collapsing by Centro de Salud 
 
-names(casosRM)
-obj1<-casosRM[,.N,by=.(`Centro de salud`)]
+names(casos_region_metropolitana)
+obj1<-casos_region_metropolitana[,.N,by=.(`Centro de salud`)]### lista de los casos de la región metropolitana.
+obj1
 
 
-obj1[,sum(N,na.rm = T)]
 
-obj1[,porc:=N/sum(N,na.rm = T)]
+obj1[,sum(N,na.rm = T)] ### suma de los casos que hay en la region metropolitana.
+
+obj1[,porc:=N/sum(N,na.rm = T)] ## me está sacando el porcentaje de la suma anterior por centro de salud
+
+obj1
 
 # collapsing (colapsar) by average age
 
 
-A<-casosRM[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)]
+A<-casos_region_metropolitana[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)]### media de edad por centro de salud
 
-B<-casosRM[,.(Total_centro=.N),by=.(`Centro de salud`)]
+B<-casos_region_metropolitana[,.(Total_centro=.N),by=.(`Centro de salud`)]
 
-C<-casosRM[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)]
+C<-casos_region_metropolitana[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)]
 
-D<-casosRM[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)]
+D<-casos_region_metropolitana[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)]
 
 dim(A)
 dim(B)
@@ -83,19 +95,37 @@ dim(D)
 
 
 AB<-merge(A,B,by = "Centro de salud",all = T,sort = F)
+AB
+
 
 
 ABC<-merge(AB,C,by = "Centro de salud",all = T,sort = F)
+
+ABC
+
+
 ABCD<-merge(ABC,D,by = "Centro de salud",all = T,sort = F)
 
-ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro]
+ABCD
+
+ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro] ### DE ABCD quiero que me calcule tmbn el procentaje de mujeres.
+
+ABCD
+
+ABCD[, porc_hombres:=Total_Centro_Hombres/Total_centro] ### Acá le agregue el % de los hombres.
+
+ABCD
 
 
 # reshaping
 
-E<-casosRM[,.(AvAge=mean(Edad,na.rm = T),`Casos confirmados`=.N),by=.(`Centro de salud`,Sexo)]
+E<-casos_region_metropolitana[,.(AvAge=mean(Edad,na.rm = T),`Casos confirmados`=.N),by=.(`Centro de salud`,Sexo)]
+
+E
 
 G<-reshape(E,direction = 'wide',timevar = 'Sexo',v.names = c('AvAge','Casos confirmados'),idvar = 'Centro de salud')
+
+G
 
 #---- Part 2: Visualization  -------------------
 
