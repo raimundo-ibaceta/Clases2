@@ -101,38 +101,43 @@ G<-reshape(E,direction = 'wide',timevar = 'Sexo',v.names = c('AvAge','Casos conf
 
 #Scatter plot
 #Base R 
-plot(G$`Casos confirmados.Femenino`,G$`Casos confirmados.Masculino`)
-text(x =G$`Casos confirmados.Femenino`,y=G$`Casos confirmados.Masculino`, G$`Centro de salud`,cex=0.5)
+plot(G$`Casos confirmados.Femenino`,G$`Casos confirmados.Masculino`) ### grafico de dipsersion con eje x casos feminimos y eje y casos masculinos.
+text(x =G$`Casos confirmados.Femenino`,y=G$`Casos confirmados.Masculino`, G$`Centro de salud`,cex=0.5) ### le agrego un texto en que se muestra al centro de salud en ves de los puntos, para poder "ver" cual tiene más casos en el grafico.
 
 #ggplot2
 library(ggplot2)
+
+ggplot(data=E,mapping = aes(x = AvAge, y = Casos confirmados)) + geom_point()
+
+
 names(E)
 ggplot(data = E,mapping = aes(x = AvAge,y=`Casos confirmados`)) + geom_point()
 
 
 ggplot(data = G,mapping = aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point()
 
-p1<-ggplot(G,aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point(aes(size=AvAge.Femenino,colour=AvAge.Masculino))+geom_text(aes(label=`Centro de salud`),size=2,check_overlap = T)
+p1<- ggplot(G,aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point(aes(size=AvAge.Femenino,colour=AvAge.Masculino))+geom_text(aes(label=`Centro de salud`),size=2,check_overlap = T)
+p1
 
 ggplot(data = E,mapping = aes(x=AvAge,y=`Casos confirmados`))+geom_point()+facet_wrap(~Sexo)+geom_smooth(method = 'lm',se=F) + geom_smooth(method = 'loess',col='red',se=F)
 
 
 #plotly
-#install.packages('plotly')
+install.packages('plotly')
 library(plotly)
-ggplotly(p1)
+ggplotly(p1) ### modo más interactivo.
 
 #histograms
 
-ggplot(casos,aes(x=Edad))+geom_histogram()
+ggplot(casos,aes(x=Edad))+geom_histogram() ### lo unico que cambia es el geom_histogram.
 ggplot(E,aes(x=AvAge))+geom_histogram()
 
 # Kernel Densities
 
 ggplot(E,aes(x=AvAge))+geom_density()
 ggplot(E,aes(x=AvAge,group=Sexo))+geom_density()
-ggplot(E,aes(x=AvAge,group=Sexo,colour=Sexo))+geom_density()
-ggplot(E,aes(x=AvAge,group=Sexo,colour=Sexo))+geom_density()+facet_wrap(~Sexo)
+ggplot(E,aes(x=AvAge,group=Sexo,colour=Sexo))+geom_density() ### los diferencio por color.
+ggplot(E,aes(x=AvAge,group=Sexo,colour=Sexo))+geom_density()+facet_wrap(~Sexo)### los veo separados
 
 
 #looking at the whole country
@@ -152,8 +157,8 @@ ggplot(casos,aes(x=Edad,group=Sexo,fill=Sexo))+geom_histogram()
 #https://chilecracia.org 
 
 #---- Part 3: Intro to Mapping (Shapefile) -------------------
-#install.packages("chilemapas")
-#install.packages("rgdal")
+install.packages("chilemapas")
+install.packages("rgdal")
 library(rgdal)
 library(sp)
 library(chilemapas)
@@ -168,12 +173,14 @@ View(ogrDrivers())
 comunas_rm<-readOGR("Class_04/ComunasR13/COMUNA_C17.shp")
 class(comunas_rm)
 
+comunas_rm@proj4string ### aca estoy pidiendo la proyección, medición que se hace
+
 comunas_rm@proj4string
 
 View(comunas_rm@data)
-plot(comunas_rm)
+plot(comunas_rm) ### se plotean las comunas de santiago.
 
-coordinates(comunas_rm)
+coordinates(comunas_rm) ### función que permite ver las coordenadas latitud y longitud, son los centroides.
 
 centroids_rm<-SpatialPoints(coordinates(comunas_rm),proj4string = comunas_rm@proj4string)
 plot(comunas_rm)
