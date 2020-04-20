@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r parametros, include = FALSE}
 month <- params$month
+month
 ```
 
 # Introducción a paquetes ggplot2 y highcharter
@@ -39,7 +40,9 @@ Ggplot2 es una herramienta super útil al momento de generár análisisi descrip
 Antes de comenzar a trabajar, filtremos la base por el último trimestre disponible (que corresponde a diciembre - febrero). Notar que como la base comienza desde febrero de 2019 (y la base llega hasta enero de 2020), solo es necesario filtrar por el mes:
 
 ```{r colapsando base 1}
-cat_ocup <- Tabla_19_19[mes_central == params$month,.(sum(V1)),by= "cae_general_red"]
+names(Tabla_19_19)
+cat_ocup <- Tabla_19_19[mes_central == params$month,.(sum(V1)),by=cae_general_red]
+cat_ocup
 ```
 
 ## Introducción a comandos básicos de ggplot2
@@ -103,20 +106,27 @@ Por lo tanto, pudiese ser mejor mejor quedarnoso solo con las variaciones de per
 
 ```{r rezago}
 var_sexo <- Tabla_19_19[cae_general_red == "Ocupados", sum(V1), by = .(ano_trimestre,mes_central,sexo)]
+var_sexo
 var_sexo[,sexo_anterior := shift(V1, n = 1, type = 'lag'), by = .(sexo)]
+
+var_sexo
 ```
 
 Crearemos una evolución absoluta y otra porcentual (con respecto al trimestre anterior) de los ocupados por género, aunque observaremos que el resultado gráfico es el mismo:
 
 ```{r variacion}
 var_sexo[,sexo_absoluto := round(V1 - sexo_anterior)]
+var_sexo
 var_sexo[,sexo_porcentual := round((V1 - sexo_anterior)/sexo_anterior,4)*100]
+var_sexo
 ```
 
 Para el problema del orden de los trimestres, asignamos etiquetas y ordenamos según dichas etiquetas:
 
 ```{r agregando etiquetas 2}
 var_sexo$mes_nombre <- factor(var_sexo$mes_central, levels = c(2:12,1), labels = c("FEB","MAR","ABR","MAY","JUN","JUL","AGO","SEP","OCT","NOV","DIC","ENE"))
+
+var_sexo
 ```
 
 Ahora volvemos a graficar la variación absoluta por genero:

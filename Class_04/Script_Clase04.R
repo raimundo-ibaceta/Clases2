@@ -193,8 +193,11 @@ str(comunas_rm@data)
 # 3.2 Shapefiles as in the `sf` package
 
 zonas_censo<-data.table(censo_2017_zonas,stringsAsFactors = F)
+head(zonas_censo) ### edad y población.
 
 poblacion_adulto_mayor_zonas<-zonas_censo[edad=="65 y mas",.(AdultosMayores=sum(poblacion)),by=.(geocodigo)]
+
+head(poblacion_adulto_mayor_zonas)
 
 zonas_valparaiso<-mapa_zonas[mapa_zonas$codigo_region=="05",]
 

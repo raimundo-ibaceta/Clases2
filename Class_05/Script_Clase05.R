@@ -3,12 +3,17 @@
 # Basado en Datos COVID19 CHILE
 # Fuente: https://github.com/MinCiencia/Datos-COVID19 
 
-#install.packages('sf')
+#
+
+install.packages('sf')
+library(sf)
 
 library(data.table)
 library(ggplot2)
+covid <- fread(input = "Class_05/2020-04-08-CasosConfirmados.csv")
+covid<- fread(input ="Class_05/2020-04-08-CasosConfirmados.csv")
 
-covid<-fread(input ="Class_05/2020-04-08-CasosConfirmados.csv")
+
 str(covid)
 sapply(covid,FUN = class)
 
