@@ -10,6 +10,7 @@
 #Covid
 library(data.table)
 
+
 archivos<-dir(path = "Class_06/producto2/")
 COVID<-fread(input =paste0("Class_06/producto2/",archivos[1]))
 names(COVID)[6]<-paste0("Confirmados_",substr(archivos[1],start = 1,stop = 10))
@@ -42,7 +43,7 @@ comunas_rm<-mapa_comunas[mapa_comunas$codigo_region==13,]
 
 comunas_rm<-merge(x = comunas_rm,y = COVID[`Codigo region`==13,],by.x="codigo_comuna",by.y="Codigo comuna",all.x=TRUE,sort=F)
 
-comunas_rm<-as_Spatial(comunas_rm)
+comunas_rm<- st_sf(comunas_rm)
 
 library(spdep)
 
