@@ -17,7 +17,7 @@ library(data.table)
 casos<-data.table(read_excel("Class_02/2020-03-17-Casos-confirmados.xlsx",na = "—",trim_ws = TRUE,col_names = TRUE),stringsAsFactors = FALSE)
 
 names(casos)
-casos<-casos[Región=="Metropolitana",]
+casos<-casos[Región=="Metropolitana",] ### defino casos como los de la región metropolitana.
 
 saveRDS(casos,"Class_03/casosRM.rds")
 
@@ -33,7 +33,7 @@ library(foreign)
 
 casosRM<-fread("Class_03/CasosCovid_RM.csv",header = T, showProgress = T,data.table = T)
 
-casosRM[,table(Sexo)]
+casosRM[,table(Sexo)] ### table me cuenta los casos masculinos y femeninos, recordar!!
 casosRM[Sexo=="Fememino",Sexo:="Femenino"]
 
 casosRM[`Centro de salud`=="Clínica Alemana",`Centro de salud`:="Clinica Alemana"]
@@ -49,29 +49,32 @@ head(casosRM$Sexo)
 head(as.numeric(casosRM$Sexo))
 
 table(casosRM$Sexo)
+table(casosRM$`Centro de salud`)
 casosRM[,.N,by=.(Sexo)]
-casosRM[,.N,by=.(Sexo,`Centro de salud`)]
+casosRM[,.N,by=.(Sexo,`Centro de salud`)] ### me ordena en una lista los casos femeninos y masculinos por centro de salud.
 
 #Collapsing by Centro de Salud 
 
 names(casosRM)
-obj1<-casosRM[,.N,by=.(`Centro de salud`)]
+obj1<-casosRM[,.N,by=.(`Centro de salud`)] ### quiero una lista con la cantidad de casos por centro de salud.
 
 
-obj1[,sum(N,na.rm = T)]
+obj1[,sum(N,na.rm = T)] ### Suma de todos los casos en la región metropolitana.
 
-obj1[,porc:=N/sum(N,na.rm = T)]
+obj1[,porc:=N/sum(N,na.rm = T)] ### agrego una columna con el procentaje en cada centro de salud, esto se llamaba LAG.
+
+obj1
 
 # collapsing (colapsar) by average age
 
 
-A<-casosRM[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)]
+A<-casosRM[,.(AvAge=mean(Edad,na.rm = T)),by=.(`Centro de salud`)] ### promedio de edad de contagiados por cada centro de salud d
 
-B<-casosRM[,.(Total_centro=.N),by=.(`Centro de salud`)]
+B<-casosRM[,.(Total_centro=.N),by=.(`Centro de salud`)] ### casos totales por cada centro de salud.
 
-C<-casosRM[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)]
+C<-casosRM[Sexo=="Femenino",.(Total_Centro_Mujeres=.N),by=.(`Centro de salud`)] ### Casos confirmados solo de mujeres por centro de salud.
 
-D<-casosRM[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)]
+D<-casosRM[Sexo=="Masculino",.(Total_Centro_Hombres=.N),by=.(`Centro de salud`)] ### Casos confirmados de hombres por centro de salud.
 
 dim(A)
 dim(B)
@@ -82,20 +85,20 @@ dim(D)
 #merging data sets
 
 
-AB<-merge(A,B,by = "Centro de salud",all = T,sort = F)
+AB<-merge(A,B,by = "Centro de salud",all = T,sort = F)### Mezclo ambas datas creadas, las de promedio de edad y cantidad de contagiados.
 
 
 ABC<-merge(AB,C,by = "Centro de salud",all = T,sort = F)
-ABCD<-merge(ABC,D,by = "Centro de salud",all = T,sort = F)
+ABCD<-merge(ABC,D,by = "Centro de salud",all = T,sort = F) ### mezcla total de mujeres, hombres y promedio de edad.
 
-ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro]
-
+ABCD[,porc_mujeres:=Total_Centro_Mujeres/Total_centro] ### agrego una columna que me dará el procentaje de mujeres contagiadas.
+ABCD[,porc_hombres:= Total_Centro_Hombres/Total_centro]
 
 # reshaping
 
 E<-casosRM[,.(AvAge=mean(Edad,na.rm = T),`Casos confirmados`=.N),by=.(`Centro de salud`,Sexo)]
 
-G<-reshape(E,direction = 'wide',timevar = 'Sexo',v.names = c('AvAge','Casos confirmados'),idvar = 'Centro de salud')
+G<-reshape(E,direction = 'wide',timevar = 'Sexo',v.names = c('AvAge','Casos confirmados'),idvar = 'Centro de salud') ### reestructuración de la base de datos.
 
 #---- Part 2: Visualization  -------------------
 
@@ -107,16 +110,15 @@ text(x =G$`Casos confirmados.Femenino`,y=G$`Casos confirmados.Masculino`, G$`Cen
 #ggplot2
 library(ggplot2)
 
-ggplot(data=E,mapping = aes(x = AvAge, y = Casos confirmados)) + geom_point()
-
-
+ggplot(data=E,mapping = aes(x = AvAge, y = `Casos confirmados`)) + geom_point() ### gráfico típico, primero pongo la data, después los ejes y el tipo de gráfico que quiero.
 names(E)
 ggplot(data = E,mapping = aes(x = AvAge,y=`Casos confirmados`)) + geom_point()
 
 
-ggplot(data = G,mapping = aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point()
+ggplot(data = G,mapping = aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point() ### gráfico con los casos confirmados femenino y masculino.
 
 p1<- ggplot(G,aes(x=`Casos confirmados.Femenino`,y=`Casos confirmados.Masculino`))+geom_point(aes(size=AvAge.Femenino,colour=AvAge.Masculino))+geom_text(aes(label=`Centro de salud`),size=2,check_overlap = T)
+
 p1
 
 ggplot(data = E,mapping = aes(x=AvAge,y=`Casos confirmados`))+geom_point()+facet_wrap(~Sexo)+geom_smooth(method = 'lm',se=F) + geom_smooth(method = 'loess',col='red',se=F)
@@ -125,7 +127,7 @@ ggplot(data = E,mapping = aes(x=AvAge,y=`Casos confirmados`))+geom_point()+facet
 #plotly
 install.packages('plotly')
 library(plotly)
-ggplotly(p1) ### modo más interactivo.
+ggplotly(p1) ### modo más interactivo, puedo poner el mouse encima y ver los números directamente.
 
 #histograms
 
