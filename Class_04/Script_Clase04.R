@@ -179,7 +179,7 @@ comunas_rm@proj4string ### aca estoy pidiendo la proyección, medición que se h
 
 comunas_rm@proj4string
 
-View(comunas_rm@data)
+View(comunas_rm@data) ### veo las comunas de la región metropolitana.
 plot(comunas_rm) ### se plotean las comunas de santiago.
 
 coordinates(comunas_rm) ### función que permite ver las coordenadas latitud y longitud, son los centroides.
@@ -194,18 +194,23 @@ str(comunas_rm@data)
 
 # 3.2 Shapefiles as in the `sf` package
 
-zonas_censo<-data.table(censo_2017_zonas,stringsAsFactors = F)
+help(package = "chilemapas") ### IMPORTANTE, con este help puedo viualizar que es lo que realmente quiero plotear.
+
+zonas_censo<-data.table(censo_2017_zonas,stringsAsFactors = F)### Creo un data table de lo que quiero del paquete.
 head(zonas_censo) ### edad y población.
+table(zonas_censo$edad) ### encuentro la categoría que quiero.
+
 
 poblacion_adulto_mayor_zonas<-zonas_censo[edad=="65 y mas",.(AdultosMayores=sum(poblacion)),by=.(geocodigo)]
+head(poblacion_adulto_mayor_zonas) ### divido o más bien, filtro la data table creada de acuerdo a lo que me interesa, en este caso adultos mayores.
 
-head(poblacion_adulto_mayor_zonas)
 
-zonas_valparaiso<-mapa_zonas[mapa_zonas$codigo_region=="05",]
 
-zonas_valparaiso<-merge(zonas_valparaiso,codigos_territoriales[,c("codigo_comuna","nombre_comuna")],by="codigo_comuna",all.x=TRUE,sort=F)
+zonas_valparaiso<-mapa_zonas[mapa_zonas$codigo_region=="05",] ### filtro por la región de valpo.
 
-zonas_valparaiso<-zonas_valparaiso[zonas_valparaiso$codigo_comuna%in%c("05101","05109","05103"),]
+zonas_valparaiso<-merge(zonas_valparaiso,codigos_territoriales[,c("codigo_comuna","nombre_comuna")],by="codigo_comuna",all.x=TRUE,sort=F)### le meto aquí el geocódigo.
+
+zonas_valparaiso<-zonas_valparaiso[zonas_valparaiso$codigo_comuna%in%c("05101","05109","05103"),] ### filtro solo las comunas que quiero de valparaíso.
 
 zonas_valparaiso<-merge(zonas_valparaiso,poblacion_adulto_mayor_zonas,by="geocodigo",all.x=TRUE,sort=F)
 
