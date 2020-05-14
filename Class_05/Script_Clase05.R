@@ -10,48 +10,57 @@ library(sf)
 
 library(data.table)
 library(ggplot2)
-covid <- fread(input = "Class_05/2020-04-08-CasosConfirmados.csv")
+library(circlize)
+covid <- fread(input = "Class_05/2020-04-08-CasosConfirmados.csv")### el fread me permite cargar datos grandes.hd
 covid<- fread(input ="Class_05/2020-04-08-CasosConfirmados.csv")
 
 
-str(covid)
-sapply(covid,FUN = class)
+str(covid) ### estructura de covid
+sapply(covid,FUN = class) ### me dará las clases de las variables que están en covid.
 
-covid[,`Casos Confirmados`:=as.numeric(`Casos Confirmados`)]
+covid[,`Casos Confirmados`:=as.numeric(`Casos Confirmados`)]### transformo los "--" en N.A
 
-ggplot(covid, aes(x=`Casos Confirmados`)) +geom_histogram(stat = 'count')
-ggplot(covid, aes(x=`Casos Confirmados`)) +geom_histogram(stat = 'count')+ geom_density(stat = 'count')
+ggplot(covid, aes(x=`Casos Confirmados`)) +geom_histogram(stat = 'count') ### filas que fueron sacadas por ser N.A
+ggplot(covid, aes(x=`Casos Confirmados`)) +geom_histogram(stat = 'count')+ geom_density(stat = 'count') ### el geom_density sirve para ver la distribución.
 
 
 # Choropleth maps
 library(sf)
-library(chilemapas)
+library(chilemapas)### paquete con datos y mapas, cifras de poblacion, mapas,
 
-help(package='chilemapas')
+help(package='chilemapas')### me muestra las distintas
 
-comunas_rm<-mapa_comunas[mapa_comunas$codigo_region==13,]
+comunas_rm<-mapa_comunas[mapa_comunas$codigo_region==13,]### el mapa comunas existe en el ambiente de chilemapas, saco de mapa comunas la región 13 (rm) solamente.
+comunas_rm
 
 comunas_rm<-merge(x = comunas_rm,y = covid,by.x="codigo_comuna",by.y="Codigo comuna",all.x=TRUE,sort=F)
+### al mapa de comunas le estoy metiendo los datos de covid, comunas es de menor tamaño, entonces el by
+### by.x es codigo_comunas y en covid se llama Codigo comuna, vinculame ambos por esos nobres.
+### el all.x = TRUE, le digo que quiero conservar solo las variables de codigo_comuna de comunas_rm.
+
+comunas_rm <- st_sf(comunas_rm)
 
 
 # Choropleth plot (continuos scale)
 
-library(RColorBrewer)
+library(RColorBrewer) ###
 brewer.pal.info
-paleta <- brewer.pal(n = 5,name = "Reds")
+paleta <- brewer.pal(n = 5,name = "Reds")##3 colores red, tonalidades.
 
 p_cont<-ggplot(comunas_rm) + 
-  geom_sf(aes(fill = `Casos Confirmados`, geometry = geometry)) +
-  scale_fill_gradientn(colours = paleta, name = "No. Casos") +
+  geom_sf(aes(fill = `Casos Confirmados`, geometry = geometry)) +### geom_sf, quiero que lo pinte por casos confirmados (fill)
+  scale_fill_gradientn(colours = paleta, name = "No. Casos") + ### quiero que el gradiente de los colores (tonalidades) sea de acuerdo al numero de casos.
   labs(title = "Casos Confirmados", subtitle = "Región Metropolitana - 2020-04-08") +
-  theme_minimal(base_size = 11)
+  theme_minimal(base_size = 11) ### lo único que hago es agregar titulos y subtitulos.
 
-# Choropleth plot (Discrete scale)
+# Choropleth plot (Discrete scale) ###sirve para poner escalas (5,20) (20,50) etccc...
 ## Fixed
+install.packages(classInt)
 library(classInt)
 help(package='classInt')
 
 breaks_fixed <- classIntervals(comunas_rm$`Casos Confirmados`, n = 5, style = "fixed", fixedBreaks=c(min(comunas_rm$`Casos Confirmados`,na.rm = T),5,20,50,100,max(comunas_rm$`Casos Confirmados`,na.rm = T)))
+
 
 comunas_rm$casos_fixed<-cut(comunas_rm$`Casos Confirmados`,breaks = breaks_fixed$brks)
 
@@ -59,10 +68,10 @@ p_fixed<-ggplot(comunas_rm) +
   geom_sf(aes(fill = casos_fixed, geometry = geometry)) +
   scale_fill_brewer(palette = "Reds")+
   labs(title = "Casos Confirmados", subtitle = "Región Metropolitana - 2020-04-08") +
-  theme_minimal(base_size = 11)
+  theme_minimal(base_size = 11) ### Le estoy agregando escala al mapeo anterior.
 
 # Equal interval
-breaks_equal <- classIntervals(comunas_rm$`Casos Confirmados`, n = 5, style = "equal")
+breaks_equal <- classIntervals(comunas_rm$`Casos Confirmados`, n = 5, style = "equal") ### quiero que el style sea equal
 
 comunas_rm$casos_equal<-cut(comunas_rm$`Casos Confirmados`,breaks = breaks_equal$brks)
 
@@ -108,7 +117,7 @@ p_sd<-ggplot(comunas_rm) +
 
 
 ##### leaflet
-library(leaflet)
+library(leaflet) ### FORMATO QUE SIRVE PARA 
 library(sp)
 
 st_crs(comunas_rm)
