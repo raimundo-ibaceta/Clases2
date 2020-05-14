@@ -32,7 +32,7 @@ paquetes <- c('data.table',
               'geojsonio',
               'chilemapas')
 options(scipen=999,encoding = "UTF-8")
-paquetes_no_instalados <- paquetes[!(paquetes %in% installed.packages()[,"Package"])]  # Lista de aquellos paquetes no instalados 
+paquetes_no_instalados <- paquetes[!(paquetes %in% installed.packages()[,"Package"])]  # Lista de aquellos. paquetes no instalados 
 sapply(paquetes_no_instalados, install.packages,character.only=T)  # Instalamos dichos nuevos paquetes
 sapply(paquetes, library, character.only = TRUE); rm(paquetes, paquetes_no_instalados) # Cargamos los paquetes
 ```
