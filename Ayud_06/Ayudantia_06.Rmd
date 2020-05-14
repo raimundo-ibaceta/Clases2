@@ -25,7 +25,7 @@ library(classInt)
 ```
 
 ```{r CREAMOS PARAMETROS,include=FALSE}
-reg <- params$reg
+reg <- params$reg ### creo un objeto que sirve para determinar la región que yo quiera en base a lo que voy haciendo.
 ```
 
 ## Repaso de mapeo en ggplot2 y leaflet
@@ -33,22 +33,22 @@ Anteriormente trabajamos con datos de establecimientos municipales. Recordar que
 
 ```{r educación, echo=F}
 rbd <- data.table(st_read("Establecimientos_EdEscolar_Dic2019/Establecimientos_EdEscolar_Dic2019.shp"))
-rbd <- rbd[COD_REGION == params$reg,]
+rbd <- rbd[COD_REGION == params$reg,] ### codigo de región va a depender de lo que yo ponga como reg (que región yo elija.)
 ```
 
 Creemos primero un choropleto que muestre el número de colegios (sean municipales, subvencionados o privados) de la región por comunas. Haremos la versión para ggplot2 y leaflet:
 
 ```{r chilemapas, echo=F}
-mapa <- data.table(mapa_comunas)
+mapa <- data.table(mapa_comunas) ### cargar la data de mapa_comunas como un data table.
 mapa <- mapa[codigo_region == params$reg,]
-mapa$codigo_comuna <- as.numeric(mapa$codigo_comuna) # para hacer merge
+mapa$codigo_comuna <- as.numeric(mapa$codigo_comuna) # para hacer merge, transformo codigo_comuna a character.
 ```
 
 Contamos el número de establecimientos por comuna:
 
 ```{r contar, echo=F}
 rbd2 <- rbd[,.N, by = .(COD_COM,COMUNA)] # Por cada COD_COM hay una COMUNA, por lo que no cambia el colapso
-escuelas <- merge(mapa,rbd2, by.x = "codigo_comuna", by.y = "COD_COM")
+escuelas <- merge(mapa,rbd2, by.x = "codigo_comuna", by.y = "COD_COM") ### merge de siempre entre codigo de mapas y codigo de comunas, a mapas quiero que le asignes los datos de rbd2.
 ```
 
 Graficamos para ggplot2:
@@ -56,19 +56,22 @@ Graficamos para ggplot2:
 ```{r ggplot 1, echo=F}
 GRAFICO_1_REG <-
   ggplot(data = escuelas) +
-  geom_sf(aes(geometry = geometry, fill = N)) +
+  geom_sf(aes(geometry = geometry, fill = N)) + ### geometry es la variable donde tiene la lista de los vectores que genera el polígono.
   xlab('Longitud') +
   ylab('Latitud') +
   labs(title = paste("Región",params$reg), subtitle = 'Número de estabelcimientos educacionales') +
   scale_fill_continuous(trans = 'reverse')
 
 GRAFICO_1_REG
+
+
+###Conclusión: Las comunas en las que hay una mayor cantidad de establecimientos educacionales son las centricas.
 ```
 
 Recordar que, para el caso de leaflet, es necesario transformar la base nuevamente a clase sf. Por lo tanto:
 
 ```{r sf, echo=F}
-mapa_lf <- st_sf(escuelas) # Mapa tiene que ser clase sf
+mapa_lf <- st_sf(escuelas) # Mapa tiene que ser clase sf, es lo primero, tranformar la base de datos a sf.
 st_crs(mapa_lf)
 mapa_lf <- st_transform(mapa_lf,crs = "+proj=longlat +datum=WGS84")
 ```
@@ -76,18 +79,18 @@ mapa_lf <- st_transform(mapa_lf,crs = "+proj=longlat +datum=WGS84")
 Graficamos para leaflet:
 
 ```{r leaflet 1, echo=F}
-pal <- colorBin("YlOrRd", domain = mapa_lf$N)
+pal <- colorBin("YlOrRd", domain = mapa_lf$N) ### defino primero las paletas.
 
 leaflet(mapa_lf) %>% 
   addTiles() %>%
-  addPolygons(fillColor = ~pal(N), weight = 2, opacity = 1, color = "black", dashArray = "3",fillOpacity = 0.5,popup = ~COMUNA)
+  addPolygons(fillColor = ~pal(N), weight = 2, opacity = 1, color = "black", dashArray = "3",fillOpacity = 0.5,popup = ~COMUNA) ### Mapa más interactivo de las comunas con más establecimientos.
 ```
 
-Recorar que si existe una disperción de los datos muy homogenea puede costar ver la diferencia de colores entre comunas, dado que estamos utilizando una categoría continua como "fill" de las comunas. Podría ser buena idea agregar una variable categórica que permita diferenciar de mejor manera entre comunas:
+Recordar que si existe una disperción de los datos muy homogenea puede costar ver la diferencia de colores entre comunas, dado que estamos utilizando una categoría continua como "fill" de las comunas. Podría ser buena idea agregar una variable categórica que permita diferenciar de mejor manera entre comunas:
 
 ```{r breaks, echo=F}
-breaks_quantile = classIntervals(escuelas$N, n= 5, style = "quantile")
-escuelas$quantile = cut(escuelas$N,breaks = breaks_quantile$brks, include.lowest = T)
+breaks_quantile = classIntervals(escuelas$N, n= 5, style = "quantile")### el quantile es para que se noten más las diferencias entre comunas con cantidad parecida de centros educacionales (5 categorias, 5 quintiles)
+escuelas$quantile = cut(escuelas$N,breaks = breaks_quantile$brks, include.lowest = T) ### aquí hacemos el cut, intervalo con el número de las escuelas.
 ```
 
 Graficamos nuevamente para ggplot2:
