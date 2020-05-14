@@ -16,7 +16,7 @@ sapply(packages,FUN = require,character.only=T)
 #install.packages('RStoolbox')
 
 #cargando datos
-path<- paste0(getwd(),"/Class_08/LC08_L1TP_001076_20180228_20180308_01_T1/")
+path<- paste0(getwd(),"/Class_08/Imagenes/LC08_L1TP_001076_20180228_20180308_01_T1/")
 files <- list.files(path,pattern=glob2rx("LC08*.TIF"), full.names = T)
 sat<-satellite(files)
 
