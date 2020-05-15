@@ -44,6 +44,9 @@ Hoy trabajaremos con datos de pobreza comunal, los cuales corresponden a datos c
 ```{r CARGANDO BASES,include=FALSE}
 mapa <- data.table(mapa_comunas)
 pobreza <- data.table(read_excel("I%CC%81NDICE-DE-POBREZA-POR-COMUNA-2017.xlsx"))
+
+class(mapa_comunas$codigo_comuna)
+class(pobreza$Cod.Com)
 ```
 
 Notamos que la clase del código comunal, con el cual más adelante utilizaremos para hacer merge entre distintas bases, es de clase numérica. Po otro lado, la clase de los códigos comunales en el resto de las bases es de clase factor o character. En consecuencia, es necesario cambiar la clase de dicha varible y anteponer un "0" a aquellos códigos comunales que se encuentren por debajo de "10000" (dado que siendo clase numérica no considera los ceros al lado izquierdo). También se puede observar que la clase de la variable de pobreza comunal está en clase character, por lo que la cambiamos a variable numérica para tener una escla continua.
@@ -51,7 +54,7 @@ Notamos que la clase del código comunal, con el cual más adelante utilizaremos
 ```{r TRABAJANDO CON POBREZA}
 names(pobreza)[names(pobreza) == "Porc.Pobr"] <- "PORCPOBR" ### modifico el nombre.
 pobreza[, Cod.Com := ifelse(Cod.Com < 10000 , paste0("0",pobreza$Cod.Com), pobreza$Cod.Com)]## cambio str a int, para hacer un merge.
-pobreza$PORCPOBR <- as.numeric(pobreza$PORCPOBR)
+pobreza$PORCPOBR <- as.numeric(pobreza$PORCPOBR)### Cambio a entero.
 ```
 
 Una vez arreglado estos problemas, hacemos un merge entre la base que contiene los datos de pobreza y la base que posee los vectores para generar los polígonos de las comunas. También modificamos la clase de la variable de codigo regional, de tal manera de poder filtrar mediante el parametro "reg" creado en "params"reg".
@@ -65,7 +68,7 @@ mapa$codigo_region <- as.numeric(mapa$codigo_region)### filtro por numero para l
 Creamos un objeto que contenga el nombre de las regiones (ordenadas por orden de region). Luego, graficamos la región seleccionada y establecemos el porcentaje de pobreza comunal como el "fill" de las comunas. Esto permite observar que comunas son más vulnerables dentro de una región.
 
 ```{r ggplot 1}
-REGIONES1 <- unique(pobreza$Region)### vector que saque los nombres de todas las regiones
+REGIONES1 <- unique(pobreza$Region)### vector que saque los nombres de todas las regiones.
 
 GRAFICO_1_REG <-
   ggplot(data = mapa[codigo_region == params$reg,]) +
