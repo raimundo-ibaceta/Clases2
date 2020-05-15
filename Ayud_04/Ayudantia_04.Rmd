@@ -5,7 +5,7 @@ output:
   theme: cosmo
   
 params:
-  reg:  3
+  reg:  13
 ---
 
 ```{r CREAMOS PARAMETROS,include=FALSE}
@@ -84,6 +84,7 @@ GRAFICO_1_REG
 Si bien el porcentaje de individuos pobres en cada comuna es relevante, este no deja de ser relativo al número total de personas que viven en dicha comuna. Si estubiesemos estudiando la distribución geográfica de los pobres en una región, pudiese ser más relevante saber el número de personas que son pobres, y no tanto el porcentaje (un 5% de pobres en Las Condes no es lo mismo que un 5% de pobres en Camarones). Por lo tanto, es necesario ajustar la variable de pobreza comunal (mejor crear una nueva variable).
 
 ```{r merge 2}
+library(data.table)
 censo <- data.table(censo_2017_comunas) ### creo una data table de censo.
 censo <- censo[,.(`Población` = sum(poblacion)), by = .(codigo_comuna)] ## sumo la población por codigo comuna.
 mapa <- merge(mapa,censo, by = "codigo_comuna")### hago el merge entre mapa y censo.
