@@ -63,6 +63,7 @@ comunas_rm<-merge(x = comunas_rm,y = COVID[`Codigo region`==13,],by.x="codigo_co
 
 comunas_rm<-as_Spatial(comunas_rm)
 
+install.packages("spdep")
 library(spdep)
 
 nbs<-poly2nb(comunas_rm,queen = T)
