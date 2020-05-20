@@ -7,14 +7,14 @@
 
 # Spatial randomness
 
-#install.packages('plot.matrix')
+install.packages('plot.matrix')
 library(plot.matrix)
 library(classInt)
 
-a<-rnorm(100,0,1)
-A<-matrix(a,10,10)
-b_A<-classIntervals(a,n = 5,style = 'jenks')
-plot(A, breaks = b_A$brks, key=NULL)
+a<-rnorm(100,0,1) ### cree una variable aleatoria.
+A<-matrix(a,10,10) ### La puse en una matriz.
+b_A<-classIntervals(a,n = 5,style = 'jenks') ### genero los intervalos por el que quiero que se plotee.
+plot(A, breaks = b_A$brks, key=NULL) ### ploteo la variable.
 
 b<-a
 B<-matrix(c(sample(b,15),sort(sample(b,25)),sample(b,15),sort(sample(b,15)),sample(b,10)),10,10)
@@ -22,23 +22,26 @@ B<-matrix(c(sample(b,15),sort(sample(b,25)),sample(b,15),sort(sample(b,15)),samp
 b_B<-classIntervals(b,n = 5,style = 'jenks')
 plot(B, breaks = b_B$brks, key=NULL)
 
+### La diferencia con la anterior es que esta se ve un poco más concentrada, en los extremos están las partes más
+### oscuras.
+
 
 #Covid
 library(data.table)
 
-archivos<-dir(path = "Class_06/producto2/")
-COVID<-fread(input =paste0("Class_06/producto2/",archivos[1]))
+archivos<-dir(path = "Class_06/producto2/") ### la función dir es para que me diga que hay en esa carpeta.
+COVID<-fread(input =paste0("Class_06/producto2/",archivos[1])) ### genero un primer obejto que me lea el archivo 1, casos confirmados para el 30 de marzo. 
 names(COVID)[6]<-paste0("Confirmados_",substr(archivos[1],start = 1,stop = 10))
 
 for(i in 2:length(archivos)){
-  aa<-fread(input =paste0("Class_06/producto2/",archivos[i]))
-  aa<-aa[,.(`Codigo comuna`,`Casos Confirmados`)]
+  aa<-fread(input =paste0("Class_06/producto2/",archivos[i])) ### genere un objeto aa que sea la lectura de i, que irá de 2 hasta 9
+  aa<-aa[,.(`Codigo comuna`,`Casos Confirmados`)] ### lo leerá y lo guardará en aa.
   names(aa)[2]<-paste0("Confirmados_",substr(archivos[i],start = 1,stop = 10))
   COVID<-merge(COVID,aa,by="Codigo comuna",all.x=T,sort=F)
 }
-View(COVID)
+View(COVID) ### loop que me da los casos confirmados de cada región por fecha respectiva. UTIL.
 
-COVID[is.na(`Confirmados_2020-03-30`),`Confirmados_2020-03-30`:=0]
+COVID[is.na(`Confirmados_2020-03-30`),`Confirmados_2020-03-30`:=0] ### que me reemplace los na por un 0.
 
 library(ggplot2)
 ggplot(COVID,aes(x=`Confirmados_2020-03-30`,y=`Confirmados_2020-04-17`))+geom_point()+geom_smooth(method = lm)
