@@ -11,10 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 ```{r paquetes}
-#devtools::install_github("hrbrmstr/nominatim")  # No es necesario que lo instale ahora
+devtools::install_github("hrbrmstr/nominatim")# No es necesario que lo instale ahora
+install.packages("devtools")
+library(devtools)
 library(googleway)
 library(data.table)
-library(nominatim)
+library(nominatim) ### al igual que google ways también busca información solo que de otra base de datos, me traerá latitudes y longitudes, de por ejemplo farmacias ahumada.
 library(tidyverse)
 library(leaflet)
 library(REAT)
