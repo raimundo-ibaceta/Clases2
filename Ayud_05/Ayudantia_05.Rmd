@@ -207,7 +207,7 @@ Un medio, en caso de no desear utilizar googleways por temor a algún cobro no a
 Se adjunta pagina web con mayores detalles del paquete y las funciones disponibles (<https://www.r-bloggers.com/introducing-the-nominatim-geocoding-package/>). Por medio de la función "osm_search", se puede acceder a la base de datos de OpenStreetMap con los datos georreferenciados del string que estamos buscando. Repitiendo la busqueda de en donde me encuentro (biblioteca nacional):
 
 ```{r nominatim}
-#B_nacional_2 <- osm_search("Biblioteca Nacional de Chile, Santiago, Chile", limit=20, key = "AaZKbR2MScvFTOfZ99DQdDPyrPeV7d99")
+Restaurantes_ñuñoa <- osm_search("Restaurants in Ñuñoa, Santiago, Chile", limit=200, key = "f10irzMEGOUdbwGs5ulDVnM093EAk4EV")
 B_nacional_2 <- readRDS("B_nacional_2.rds")
 B_nacional_2 <- glimpse(B_nacional_2)
 saveRDS(B_nacional_2,"B_nacional_2.rds")
